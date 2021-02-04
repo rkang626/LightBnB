@@ -1,5 +1,3 @@
-const properties = require('./json/properties.json');
-// const users = require('./json/users.json');
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -23,8 +21,8 @@ const getUserWithEmail = function(email) {
   WHERE email = $1;
   `;
   return pool.query(queryString, [email])
-  .then(res => res.rows[0]);
-}
+    .then(res => res.rows[0]);
+};
 exports.getUserWithEmail = getUserWithEmail;
 
 /**
@@ -39,8 +37,8 @@ const getUserWithId = function(id) {
   WHERE id = $1;
   `;
   return pool.query(queryString, [id])
-  .then(res => res.rows[0]);
-}
+    .then(res => res.rows[0]);
+};
 exports.getUserWithId = getUserWithId;
 
 
@@ -55,8 +53,8 @@ const addUser =  function(user) {
   VALUES ($1, $2, $3) RETURNING *;
   `;
   return pool.query(queryString, [user.name, user.email, user.password])
-  .then(res => res.rows[0]);
-}
+    .then(res => res.rows[0]);
+};
 exports.addUser = addUser;
 
 /// Reservations
@@ -66,7 +64,7 @@ exports.addUser = addUser;
  * @param {string} guest_id The id of the user.
  * @return {Promise<[{}]>} A promise to the reservations.
  */
-const getAllReservations = function(guest_id, limit = 10) {
+const getAllReservations = function(guestId, limit = 10) {
   const queryString = `
   SELECT p.*, r.*, avg(pr.rating) as average_rating
   FROM reservations r 
@@ -77,9 +75,9 @@ const getAllReservations = function(guest_id, limit = 10) {
   ORDER BY r.start_date ASC
   LIMIT $2;
   `;
-  return pool.query(queryString, [guest_id, limit])
-  .then(res => res.rows);
-}
+  return pool.query(queryString, [guestId, limit])
+    .then(res => res.rows);
+};
 exports.getAllReservations = getAllReservations;
 
 /// Properties
@@ -151,8 +149,8 @@ const getAllProperties = function(options, limit = 10) {
   `;
 
   return pool.query(queryString, queryParams)
-  .then(res => res.rows);
-}
+    .then(res => res.rows);
+};
 exports.getAllProperties = getAllProperties;
 
 
@@ -168,6 +166,6 @@ const addProperty = function(property) {
   `;
   const queryParams = [property.title, property.description, parseInt(property.number_of_bedrooms), parseInt(property.number_of_bathrooms), parseInt(property.parking_spaces), parseInt(property.cost_per_night), property.thumbnail_photo_url, property.cover_photo_url, property.street, property.country, property.city, property.province, property.post_code, property.owner_id];
   return pool.query(queryString, queryParams)
-  .then(res => res.rows[0]);
-}
+    .then(res => res.rows[0]);
+};
 exports.addProperty = addProperty;
