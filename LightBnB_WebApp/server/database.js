@@ -16,13 +16,13 @@ const pool = new Pool({
  * @param {String} email The email of the user.
  * @return {Promise<{}>} A promise to the user.
  */
-const getUserWithEmailQuery = `
-SELECT *
-FROM users
-WHERE email = $1;
-`;
 const getUserWithEmail = function(email) {
-  return pool.query(getUserWithEmailQuery, [email])
+  const queryString = `
+  SELECT *
+  FROM users
+  WHERE email = $1;
+  `;
+  return pool.query(queryString, [email])
   .then(res => res.rows[0]);
 }
 exports.getUserWithEmail = getUserWithEmail;
@@ -32,13 +32,13 @@ exports.getUserWithEmail = getUserWithEmail;
  * @param {string} id The id of the user.
  * @return {Promise<{}>} A promise to the user.
  */
-const getUserWithIdQuery = `
-SELECT *
-FROM users
-WHERE id = $1;
-`;
 const getUserWithId = function(id) {
-  return pool.query(getUserWithIdQuery, [id])
+  const queryString = `
+  SELECT *
+  FROM users
+  WHERE id = $1;
+  `;
+  return pool.query(queryString, [id])
   .then(res => res.rows[0]);
 }
 exports.getUserWithId = getUserWithId;
@@ -49,14 +49,12 @@ exports.getUserWithId = getUserWithId;
  * @param {{name: string, password: string, email: string}} user
  * @return {Promise<{}>} A promise to the user.
  */
-const addUserQuery = `
-INSERT INTO users (
-  name, email, password) 
-  VALUES (
-  $1, $2, $3) RETURNING *;
-`;
 const addUser =  function(user) {
-  return pool.query(addUserQuery, [user.name, user.email, user.password])
+  const queryString = `
+  INSERT INTO users (name, email, password) 
+  VALUES ($1, $2, $3) RETURNING *;
+  `;
+  return pool.query(queryString, [user.name, user.email, user.password])
   .then(res => res.rows[0]);
 }
 exports.addUser = addUser;
@@ -68,23 +66,18 @@ exports.addUser = addUser;
  * @param {string} guest_id The id of the user.
  * @return {Promise<[{}]>} A promise to the reservations.
  */
-const getAllReservationsQuery = `
-SELECT p.*
-     , r.*
-     , avg(pr.rating) as average_rating
-  FROM reservations r 
-  JOIN properties p
-       ON r.property_id = p.id
-  JOIN property_reviews pr 
-       ON p.id = pr.property_id 
- WHERE r.guest_id = $1
-   AND r.end_date < now()::date 
- GROUP BY p.id, r.id
- ORDER BY r.start_date asc
- limit $2;
-`;
 const getAllReservations = function(guest_id, limit = 10) {
-  return pool.query(getAllReservationsQuery, [guest_id, limit])
+  const queryString = `
+  SELECT p.*, r.*, avg(pr.rating) as average_rating
+  FROM reservations r 
+  JOIN properties p ON r.property_id = p.id
+  JOIN property_reviews pr ON p.id = pr.property_id 
+  WHERE r.guest_id = $1 AND r.end_date < now()::date 
+  GROUP BY p.id, r.id
+  ORDER BY r.start_date ASC
+  LIMIT $2;
+  `;
+  return pool.query(queryString, [guest_id, limit])
   .then(res => res.rows);
 }
 exports.getAllReservations = getAllReservations;
@@ -156,8 +149,6 @@ const getAllProperties = function(options, limit = 10) {
   ORDER BY cost_per_night
   LIMIT $${queryParams.length};
   `;
-
-  console.log(queryString, queryParams);
 
   return pool.query(queryString, queryParams)
   .then(res => res.rows);
