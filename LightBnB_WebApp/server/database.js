@@ -162,9 +162,12 @@ exports.getAllProperties = getAllProperties;
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function(property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+  const queryString = `
+  INSERT INTO properties (title, description, number_of_bedrooms, number_of_bathrooms, parking_spaces, cost_per_night, thumbnail_photo_url, cover_photo_url, street, country, city, province, post_code, owner_id) 
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *;
+  `;
+  const queryParams = [property.title, property.description, parseInt(property.number_of_bedrooms), parseInt(property.number_of_bathrooms), parseInt(property.parking_spaces), parseInt(property.cost_per_night), property.thumbnail_photo_url, property.cover_photo_url, property.street, property.country, property.city, property.province, property.post_code, property.owner_id];
+  return pool.query(queryString, queryParams)
+  .then(res => res.rows[0]);
 }
 exports.addProperty = addProperty;
